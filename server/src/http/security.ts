@@ -3,7 +3,11 @@ import crypto from 'node:crypto';
 const b64 = (b: Buffer | string) => Buffer.from(b).toString('base64url');
 const mac = (secret: string, s: string) => crypto.createHmac('sha256', secret).update(s).digest('base64url');
 
-export interface TokenPayload { sub: string; exp: number; aud?: string }
+export interface TokenPayload {
+  sub: string;
+  exp: number;
+  aud?: string;
+}
 export function signToken(secret: string, p: Omit<TokenPayload, 'exp'>, ttlSec: number): string {
   const body = b64(JSON.stringify({ ...p, exp: Math.floor(Date.now() / 1000) + ttlSec }));
   return `${body}.${mac(secret, body)}`;
@@ -13,14 +17,17 @@ export function verifyToken(secret: string, token: string | undefined, aud?: str
   const [body, sig] = token.split('.');
   if (!body || !sig) return null;
   const expect = mac(secret, body);
-  const a = Buffer.from(sig), b = Buffer.from(expect);
+  const a = Buffer.from(sig),
+    b = Buffer.from(expect);
   if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) return null;
   try {
     const p = JSON.parse(Buffer.from(body, 'base64url').toString()) as TokenPayload;
     if (p.exp < Date.now() / 1000) return null;
     if ((p.aud ?? undefined) !== aud) return null;
     return p;
-  } catch { return null; }
+  } catch {
+    return null;
+  }
 }
 
 export const hashOtp = (secret: string, phone: string, code: string) =>
@@ -32,7 +39,8 @@ export function signMedia(secret: string, id: string, ttlSec = 900): { exp: numb
 }
 export function verifyMedia(secret: string, id: string, exp: number, sig: string): boolean {
   if (!exp || exp < Date.now() / 1000) return false;
-  const a = Buffer.from(sig), b = Buffer.from(mac(secret, `media:${id}:${exp}`));
+  const a = Buffer.from(sig),
+    b = Buffer.from(mac(secret, `media:${id}:${exp}`));
   return a.length === b.length && crypto.timingSafeEqual(a, b);
 }
 
@@ -44,12 +52,18 @@ export class RateLimiter {
   check(key: string, limit: number, windowSec: number): number {
     const now = Date.now();
     const h = this.hits.get(key);
-    if (!h || h.reset <= now) { this.hits.set(key, { n: 1, reset: now + windowSec * 1000 }); return 0; }
+    if (!h || h.reset <= now) {
+      this.hits.set(key, { n: 1, reset: now + windowSec * 1000 });
+      return 0;
+    }
     h.n++;
     if (h.n > limit * this.scale) return Math.ceil((h.reset - now) / 1000);
     return 0;
   }
-  sweep() { const now = Date.now(); for (const [k, v] of this.hits) if (v.reset <= now) this.hits.delete(k); }
+  sweep() {
+    const now = Date.now();
+    for (const [k, v] of this.hits) if (v.reset <= now) this.hits.delete(k);
+  }
 }
 
 export function normalizeUaePhone(raw: string): string | null {

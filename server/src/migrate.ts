@@ -4,7 +4,9 @@ import pg from 'pg';
 import { loadConfig } from './config.js';
 
 /** Applies db/migrations/*.sql in order (idempotent, tracked in schema_migrations). --reset drops everything first. */
-export async function migrate(opts: { reset?: boolean; databaseUrl?: string; appPw?: string; svcPw?: string } = {}) {
+export async function migrate(
+  opts: { reset?: boolean; databaseUrl?: string; appPw?: string; svcPw?: string } = {},
+) {
   const cfg = loadConfig();
   const client = new pg.Client({ connectionString: opts.databaseUrl ?? cfg.databaseUrl });
   await client.connect();
@@ -22,9 +24,14 @@ export async function migrate(opts: { reset?: boolean; databaseUrl?: string; app
       if (exists.rowCount) await client.query(`alter role ${role} login ${bypass} password ${q(pw)}`);
       else await client.query(`create role ${role} login ${bypass} password ${q(pw)}`);
     }
-    await client.query('create table if not exists schema_migrations (name text primary key, applied_at timestamptz not null default now())');
+    await client.query(
+      'create table if not exists schema_migrations (name text primary key, applied_at timestamptz not null default now())',
+    );
     const dir = path.join(cfg.rootDir, 'db/migrations');
-    const files = fs.readdirSync(dir).filter((f) => f.endsWith('.sql')).sort();
+    const files = fs
+      .readdirSync(dir)
+      .filter((f) => f.endsWith('.sql'))
+      .sort();
     for (const f of files) {
       const done = await client.query('select 1 from schema_migrations where name = $1', [f]);
       if (done.rowCount) continue;
@@ -45,5 +52,11 @@ export async function migrate(opts: { reset?: boolean; databaseUrl?: string; app
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-  migrate({ reset: process.argv.includes('--reset') }).then(() => console.log('migrations up to date'), (e) => { console.error(e); process.exit(1); });
+  migrate({ reset: process.argv.includes('--reset') }).then(
+    () => console.log('migrations up to date'),
+    (e) => {
+      console.error(e);
+      process.exit(1);
+    },
+  );
 }

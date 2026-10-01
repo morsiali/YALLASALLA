@@ -1,0 +1,32 @@
+# Local PostgreSQL (default) and an optional full stack. `docker compose up -d db` is all development needs.
+# The "full" profile builds the API and web images; it has not been exercised in the authoring sandbox (no Docker daemon).
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: yalasala_owner
+      POSTGRES_PASSWORD: owner_dev_pw        # local development only
+      POSTGRES_DB: yalasala
+    ports: ['54329:5432']
+    volumes: ['pgdata:/var/lib/postgresql/data']
+    healthcheck: { test: ['CMD-SHELL', 'pg_isready -U yalasala_owner -d yalasala'], interval: 5s, timeout: 3s, retries: 20 }
+  api:
+    profiles: ['full']
+    build: { context: ., dockerfile: server/Dockerfile }
+    environment:
+      NODE_ENV: development
+      PORT: '4000'
+      DATABASE_URL: postgres://yalasala_owner:owner_dev_pw@db:5432/yalasala
+      APP_DATABASE_URL: postgres://yalasala_app:app_dev_pw@db:5432/yalasala
+      SERVICE_DATABASE_URL: postgres://yalasala_service:service_dev_pw@db:5432/yalasala
+      PUBLIC_WEB_ORIGIN: http://localhost:8080
+      STORAGE_DIR: /data/storage
+    volumes: ['storage:/data/storage']
+    depends_on: { db: { condition: service_healthy } }
+    ports: ['4000:4000']
+  web:
+    profiles: ['full']
+    build: { context: ., dockerfile: web/Dockerfile }
+    depends_on: [api]
+    ports: ['8080:80']
+volumes: { pgdata: {}, storage: {} }

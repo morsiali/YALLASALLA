@@ -4,3 +4,10 @@ web/android
 web/ios
 package-lock.json
 db/migrations
+test-results
+playwright-report
+storage-test
+storage-e2e
+exports
+THIRD_PARTY_LICENSES.md
+docs/UX-COPY.md

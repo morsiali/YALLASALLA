@@ -3,8 +3,13 @@
   "private": true,
   "version": "0.1.0",
   "license": "MIT",
-  "workspaces": ["server", "web"],
-  "engines": { "node": ">=20" },
+  "workspaces": [
+    "server",
+    "web"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "db:local:start": "bash scripts/local-pg.sh start",
     "db:local:stop": "bash scripts/local-pg.sh stop",
@@ -22,9 +27,16 @@
     "test:server": "npm run test -w server",
     "test:e2e": "npm run test:e2e -w web",
     "export:data": "npm run export -w server",
-    "zip": "bash scripts/make-zip.sh"
+    "zip": "bash scripts/make-zip.sh",
+    "docs:ux": "tsx scripts/gen-ux-copy.mts",
+    "docs:licenses": "node scripts/gen-licenses.mjs",
+    "backup": "bash scripts/backup.sh",
+    "restore": "bash scripts/restore.sh",
+    "test:web": "npm run test -w web",
+    "dev": "echo 'run in two terminals: npm run dev:server  and  npm run dev:web'"
   },
   "devDependencies": {
-    "prettier": "^3.3.3"
+    "prettier": "^3.3.3",
+    "tsx": "^4.19.2"
   }
 }

@@ -2,7 +2,10 @@ import pg from 'pg';
 import type { Config } from './config.js';
 
 export type Q = pg.PoolClient;
-export interface SessionUser { id: string; role: 'customer' | 'merchant' | 'admin' | 'support' }
+export interface SessionUser {
+  id: string;
+  role: 'customer' | 'merchant' | 'admin' | 'support';
+}
 
 // Money columns are int, counts are bigint -> parse bigint as number (values stay far below 2^53).
 pg.types.setTypeParser(20, (v) => Number(v));
@@ -45,5 +48,7 @@ export class Db {
       client.release();
     }
   }
-  async close() { await Promise.all([this.app.end(), this.service.end()]); }
+  async close() {
+    await Promise.all([this.app.end(), this.service.end()]);
+  }
 }
