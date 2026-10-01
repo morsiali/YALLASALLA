@@ -1,0 +1,16 @@
+node_modules/
+dist/
+build/
+.env
+.env.local
+*.log
+storage/
+.pgdata/
+coverage/
+playwright-report/
+test-results/
+*.zip
+.DS_Store
+web/android/app/build/
+web/android/.gradle/
+web/ios/App/Pods/

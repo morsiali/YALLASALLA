@@ -1,0 +1,30 @@
+{
+  "name": "yalasala-uae",
+  "private": true,
+  "version": "0.1.0",
+  "license": "MIT",
+  "workspaces": ["server", "web"],
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "db:local:start": "bash scripts/local-pg.sh start",
+    "db:local:stop": "bash scripts/local-pg.sh stop",
+    "db:migrate": "npm run migrate -w server",
+    "db:seed": "npm run seed -w server",
+    "db:reset": "npm run reset -w server",
+    "dev:server": "npm run dev -w server",
+    "dev:web": "npm run dev -w web",
+    "build": "npm run build -w server && npm run build -w web",
+    "format": "prettier --write \"**/*.{ts,tsx,json,md,css,sql}\" --log-level warn",
+    "format:check": "prettier --check \"**/*.{ts,tsx,json,css}\" --log-level warn",
+    "lint": "npm run lint -w server && npm run lint -w web",
+    "typecheck": "npm run typecheck -w server && npm run typecheck -w web",
+    "test": "npm run test -w server && npm run test -w web",
+    "test:server": "npm run test -w server",
+    "test:e2e": "npm run test:e2e -w web",
+    "export:data": "npm run export -w server",
+    "zip": "bash scripts/make-zip.sh"
+  },
+  "devDependencies": {
+    "prettier": "^3.3.3"
+  }
+}
